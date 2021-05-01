@@ -14,7 +14,6 @@ public class Board : MonoBehaviour
     minX = 1, maxX, minY = 1, maxY;
   Status s = new Status();
   Next next = new Next();
-  Hold hold = new Hold();
   int drop = 60, fast = 20;
   bool insert; int frm;
   internal void Init(Controller ct)
@@ -24,7 +23,7 @@ public class Board : MonoBehaviour
     c = ct; cells = c.cells.main;
     maxX = cells.GetLength(0) - 1;
     maxY = cells.GetLength(1) - 2;
-    del.Init(c); next.Init(c); hold.Init(c);
+    del.Init(c); next.Init(c);
     ResetVariables();
     Next();
   }
@@ -36,7 +35,6 @@ public class Board : MonoBehaviour
   {
     ResetVariables();
     next.Hide(); next.Reset();
-    hold.Hide(); hold.Reset();
     del.All(); Next();
     gameObject.SetActive(false);
   }
@@ -60,7 +58,6 @@ public class Board : MonoBehaviour
     }
     if (Key.Left()) Move(-1, 0);
     else if (Key.Right()) Move(1, 0);
-    if (Key.Hold()) Hold();
     else if (Key.Rotate()) Rotate();
   }
   void Insert()
@@ -138,20 +135,6 @@ public class Board : MonoBehaviour
     }
     Fix();
   }
-  internal void Hold()
-  {
-    if (hold.used) return;
-    Hide();
-    s.id = hold.Replace(s.id);
-    if (hold.IsEmpty(s.id))
-    {
-      s.id = next.Id(); // first time
-    }
-    hold.used = true;
-    frm = 0;
-    Insert();
-    Fix();
-  }
   internal void Next()
   {
     s.id = next.Id();
@@ -163,7 +146,6 @@ public class Board : MonoBehaviour
     frm = 0;
     if (Move(0, -1)) return;
     //-> dropped. no space to move.
-    hold.used = false;
     if (del.Check())
     {
       audioSource.PlayOneShot(soundDelete);
