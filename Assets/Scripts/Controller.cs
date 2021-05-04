@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,18 +12,25 @@ public class Controller : MonoBehaviour
   public Board board;
   public Score score;
   public Over over;
-  public Ready ready;
+  public ReadyGo ready;
+  public AudioSource bgmAudioSource;
   void Start()
   {
     Application.targetFrameRate = 60;
     colors.Init(cam.backgroundColor);
     cells.Init(this);
     board.Init(this);
-    ready.Init(this);
+    ready.ReadyGoEvent += OnReadyGo;
     over.Init();
     score.Resets();
     board.Render();
-    ready.Enable();
+    ready.Activate();
+  }
+  void OnReadyGo(object sender, EventArgs e)
+  {
+    board.gameObject.SetActive(true);
+    board.Drop();
+    bgmAudioSource.Play();
   }
   public void Restart()
   {
@@ -30,7 +38,7 @@ public class Controller : MonoBehaviour
     board.Resets();
     score.Resets();
     board.Render();
-    ready.Enable();
+    ready.Activate();
   }
   public void Quit()
   {
