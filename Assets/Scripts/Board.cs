@@ -70,7 +70,7 @@ public class Board : MonoBehaviour
     XY[] r = Blocks.Relatives(s);
     if (IsEmpty(s.x, s.y, r)) return;
     gameObject.SetActive(false);
-    c.over.Enable(); // game over
+    c.over.Activate(); // game over
   }
   void Fix()
   {
