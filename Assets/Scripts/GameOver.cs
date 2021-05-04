@@ -1,10 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Over : MonoBehaviour
+public class GameOver : MonoBehaviour
 {
   public AudioClip soundGameover;
   public Text title;
@@ -12,7 +13,9 @@ public class Over : MonoBehaviour
   public Text quit;
   public AudioSource audioSource;
   public AudioSource bgmAudioSource;
-  internal void Init()
+  public event EventHandler RestartEvent;
+  public event EventHandler QuitEvent;
+  void Awake()
   {
     gameObject.SetActive(false);
   }
@@ -23,8 +26,14 @@ public class Over : MonoBehaviour
     restart.GetComponent<Selectable>().Select();
     gameObject.SetActive(true);
   }
-  internal void SetActive(bool active)
+  public void Restart()
   {
-    gameObject.SetActive(active);
+    gameObject.SetActive(false);
+    RestartEvent(this, null);
+  }
+  public void Quit()
+  {
+    gameObject.SetActive(false);
+    QuitEvent(this, null);
   }
 }

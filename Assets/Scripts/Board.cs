@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,23 +8,24 @@ public class Board : MonoBehaviour
   public Delete del;
   public AudioClip soundDrop;
   public AudioClip soundDelete;
-  AudioSource audioSource;
-
-  internal Cell[,] cells; Controller c;
-  internal int //-> range of inside wall
-    minX = 1, maxX, minY = 1, maxY;
+  public AudioSource audioSource;
+  public event EventHandler GameOverEvent;
+  public event EventHandler<DeletedEventArgs> DeletedEvent;
+  internal Cell[,] cells;
+  internal int minX = 1, maxX, minY = 1, maxY;
   Status s = new Status();
   Next next = new Next();
   int drop = 60, fast = 20;
-  bool insert; int frm;
-  internal void Init(Controller ct)
+  bool insert;
+  int frm;
+  internal void Init(Cells c)
   {
-    GameObject audioHolder = GameObject.Find("AudioHolder");
-    audioSource = audioHolder.GetComponent<AudioSource>();
-    c = ct; cells = c.cells.main;
+    cells = c.main;
     maxX = cells.GetLength(0) - 1;
     maxY = cells.GetLength(1) - 2;
-    del.Init(c); next.Init(c);
+    del.Init(this);
+    del.DeletedEvent += DeletedEvent;
+    next.Init(c.next);
     ResetVariables();
     Next();
   }
@@ -68,9 +70,11 @@ public class Board : MonoBehaviour
     insert = true;
     //-> check collision
     XY[] r = Blocks.Relatives(s);
-    if (IsEmpty(s.x, s.y, r)) return;
-    gameObject.SetActive(false);
-    c.over.Activate(); // game over
+    if (!IsEmpty(s.x, s.y, r))
+    {
+      gameObject.SetActive(false);
+      GameOverEvent(this, null);
+    }
   }
   void Fix()
   {

@@ -592,7 +592,7 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 968055578}
+        - m_Target: {fileID: 1108660502}
           m_MethodName: Quit
           m_Mode: 1
           m_Arguments:
@@ -1091,7 +1091,7 @@ MonoBehaviour:
   cells: {fileID: 1598488834}
   board: {fileID: 973911896}
   score: {fileID: 1389770320}
-  over: {fileID: 1108660502}
+  gameOver: {fileID: 1108660502}
   ready: {fileID: 1658598320}
   bgmAudioSource: {fileID: 1497142823}
 --- !u!1 &973911894
@@ -1140,6 +1140,7 @@ MonoBehaviour:
   del: {fileID: 126775332}
   soundDrop: {fileID: 8300000, guid: 6739c01659ad96d47987f4ddee226b36, type: 3}
   soundDelete: {fileID: 8300000, guid: c2922b8e6b49d4264a1120560fb8fd76, type: 3}
+  audioSource: {fileID: 665550735}
 --- !u!1 &1007606829
 GameObject:
   m_ObjectHideFlags: 0
@@ -1231,7 +1232,7 @@ GameObject:
   - component: {fileID: 1108660500}
   - component: {fileID: 1108660502}
   m_Layer: 5
-  m_Name: Over
+  m_Name: GameOver
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2022,7 +2023,7 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 968055578}
+        - m_Target: {fileID: 1108660502}
           m_MethodName: Restart
           m_Mode: 1
           m_Arguments:

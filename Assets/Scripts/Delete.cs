@@ -1,15 +1,27 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public class DeletedEventArgs : EventArgs
+{
+  public DeletedEventArgs(int lines)
+  {
+    Lines = lines;
+  }
+  public int Lines { get; set; }
+}
 public class Delete : MonoBehaviour
 {
-  Controller c; Board b;
-  int frm; int delete = 30;
+  public event EventHandler<DeletedEventArgs> DeletedEvent;
+  Board b;
+  int frm;
+  int delete = 30;
   List<int> lines = new List<int>();
-  internal void Init(Controller ct)
+  internal void Init(Board board)
   {
-    c = ct; b = c.board; frm = 0;
+    b = board;
+    frm = 0;
   }
   void Update()
   {
@@ -29,9 +41,8 @@ public class Delete : MonoBehaviour
   }
   void Complete()
   {
-    int line = lines.Count;
-    c.score.Add(line);
-    for (int i = 0; i < line; i++)
+    int count = lines.Count;
+    for (int i = 0; i < count; i++)
     {
       for (int y = lines[i] - i; y < b.maxY; y++)
       {
@@ -44,6 +55,9 @@ public class Delete : MonoBehaviour
     frm = 0;
     lines.Clear();
     gameObject.SetActive(false);
+
+    DeletedEvent(this, new DeletedEventArgs(count));
+
     b.gameObject.SetActive(true);
     b.Next();
   }
