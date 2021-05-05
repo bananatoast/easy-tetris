@@ -14,9 +14,11 @@ public class Controller : MonoBehaviour
   public GameOver gameOver;
   public ReadyGo ready;
   public AudioSource bgmAudioSource;
+  int frame;
   void Start()
   {
-    Application.targetFrameRate = 60;
+    frame = 60;
+    Application.targetFrameRate = frame;
     board.GameOverEvent += OnGameOver;
     board.DeletedEvent += OnDeleted;
     ready.ReadyGoEvent += OnReadyGo;
@@ -24,9 +26,10 @@ public class Controller : MonoBehaviour
     gameOver.QuitEvent += OnQuit;
 
     colors.Init(cam.backgroundColor);
-    cells.Init(this);
+    cells.Init(colors);
     board.Init(cells);
-    score.Resets();
+    board.DropFrame = frame;
+    score.Reset();
     board.Render();
 
     ready.Activate();
@@ -34,7 +37,6 @@ public class Controller : MonoBehaviour
   void OnReadyGo(object sender, EventArgs e)
   {
     board.gameObject.SetActive(true);
-    board.Drop();
     bgmAudioSource.Play();
   }
   void OnDeleted(object sender, DeletedEventArgs e)
@@ -47,9 +49,8 @@ public class Controller : MonoBehaviour
   }
   void OnRestart(object sender, EventArgs e)
   {
-    board.Resets();
-    score.Resets();
-    board.Render();
+    board.Reset();
+    score.Reset();
     ready.Activate();
   }
   void OnQuit(object sender, EventArgs e)

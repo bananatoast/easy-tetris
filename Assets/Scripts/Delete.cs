@@ -14,28 +14,34 @@ public class DeletedEventArgs : EventArgs
 public class Delete : MonoBehaviour
 {
   public event EventHandler<DeletedEventArgs> DeletedEvent;
-  Board b;
-  int frm;
-  int delete = 30;
+  Board board;
+  int frame;
+  int deleteFrame = 30;
   List<int> lines = new List<int>();
   internal void Init(Board board)
   {
-    b = board;
-    frm = 0;
+    this.board = board;
+    frame = 0;
   }
   void Update()
   {
-    frm++;
-    if (frm == delete) Complete();
-    else Deleting();
+    frame++;
+    if (frame >= deleteFrame)
+    {
+      Complete();
+    }
+    else
+    {
+      Deleting();
+    }
   }
   void Deleting()
   {
     foreach (int y in lines)
     {
-      for (int x = b.minX; x < b.maxX; x++)
+      for (int x = board.minX; x < board.maxX; x++)
       {
-        b.cells[x, y].AddAlpha(-0.03f);
+        board.cells[x, y].AddAlpha(-0.03f);
       }
     }
   }
@@ -44,51 +50,41 @@ public class Delete : MonoBehaviour
     int count = lines.Count;
     for (int i = 0; i < count; i++)
     {
-      for (int y = lines[i] - i; y < b.maxY; y++)
+      for (int y = lines[i] - i; y < board.maxY; y++)
       {
-        for (int x = b.minX; x < b.maxX; x++)
+        for (int x = board.minX; x < board.maxX; x++)
         {
-          b.cells[x, y].id = b.cells[x, y + 1].id;
+          board.cells[x, y].id = board.cells[x, y + 1].id;
         }
       }
     }
-    frm = 0;
+    frame = 0;
     lines.Clear();
     gameObject.SetActive(false);
 
     DeletedEvent(this, new DeletedEventArgs(count));
 
-    b.gameObject.SetActive(true);
-    b.Next();
-  }
-  internal void All()
-  {
-    for (int y = b.minY; y < b.maxY; y++)
-    {
-      for (int x = b.minX; x < b.maxX; x++)
-      {
-        b.cells[x, y].id = Blocks.empty;
-      }
-    }
+    board.gameObject.SetActive(true);
+    board.Next();
   }
   void Enable()
   {
     gameObject.SetActive(true);
-    b.gameObject.SetActive(false);
+    board.gameObject.SetActive(false);
   }
   internal bool Check()
   {
-    for (int y = b.minY; y < b.maxY; y++)
+    for (int y = board.minY; y < board.maxY; y++)
     {
-      for (int x = b.minX; x < b.maxX; x++)
+      for (int x = board.minX; x < board.maxX; x++)
       {
-        if (b.cells[x, y].id == Blocks.empty) break;
+        if (board.cells[x, y].id == Blocks.empty) break;
         if (x == 10) lines.Add(y);
       }
     }
     if (lines.Count == 0)
     {
-      b.Next();
+      board.Next();
       return false;
     }
     else

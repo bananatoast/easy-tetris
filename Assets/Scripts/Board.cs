@@ -15,36 +15,48 @@ public class Board : MonoBehaviour
   internal int minX = 1, maxX, minY = 1, maxY;
   Status s = new Status();
   Next next = new Next();
-  int drop = 60, fast = 20;
   bool insert;
-  int frm;
+  int frame;
+  int dropFrame = 60;
+  int fastFrame;
+  internal int DropFrame
+  {
+    set { this.dropFrame = value; }
+    get { return this.dropFrame; }
+  }
   internal void Init(Cells c)
   {
+    fastFrame = dropFrame / 2;
     cells = c.main;
     maxX = cells.GetLength(0) - 1;
     maxY = cells.GetLength(1) - 2;
     del.Init(this);
     del.DeletedEvent += DeletedEvent;
     next.Init(c.next);
-    ResetVariables();
+    insert = false;
+    frame = 0;
     Next();
   }
-  void ResetVariables()
+  internal void Reset()
   {
-    insert = false; frm = 0;
-  }
-  internal void Resets()
-  {
-    ResetVariables();
-    next.Hide(); next.Reset();
-    del.All(); Next();
+    insert = false;
+    frame = 0;
+    next.Hide();
+    next.Reset();
+    DeleteAll();
+
+    Next();
     gameObject.SetActive(false);
+    Render();
   }
   void Update()
   {
-    frm++;
+    frame++;
     HandleInput();
-    if (frm >= drop) Drop();
+    if (frame >= dropFrame)
+    {
+      Drop();
+    }
     Render();
   }
   internal void HandleInput()
@@ -52,15 +64,24 @@ public class Board : MonoBehaviour
     Key.Handle();
     if (Key.PressingDown())
     {
-      if (!insert) frm += fast;
+      if (!insert) frame += fastFrame;
     }
     else
     {
       insert = false;
     }
-    if (Key.Left()) Move(-1, 0);
-    else if (Key.Right()) Move(1, 0);
-    else if (Key.Rotate()) Rotate();
+    if (Key.Left())
+    {
+      Move(-1, 0);
+    }
+    else if (Key.Right())
+    {
+      Move(1, 0);
+    }
+    else if (Key.Rotate())
+    {
+      Rotate();
+    }
   }
   void Insert()
   {
@@ -69,7 +90,7 @@ public class Board : MonoBehaviour
     s.ResetRotate();
     insert = true;
     //-> check collision
-    XY[] r = Blocks.Relatives(s);
+    Point[] r = Blocks.Relatives(s);
     if (!IsEmpty(s.x, s.y, r))
     {
       gameObject.SetActive(false);
@@ -79,7 +100,7 @@ public class Board : MonoBehaviour
   void Fix()
   {
     cells[s.x, s.y].id = s.id;
-    XY[] r = Blocks.Relatives(s);
+    Point[] r = Blocks.Relatives(s);
     int cx, cy;
     for (int i = 0; i < r.Length; i++)
     {
@@ -90,7 +111,7 @@ public class Board : MonoBehaviour
   void Hide()
   {
     cells[s.x, s.y].id = Blocks.empty;
-    XY[] r = Blocks.Relatives(s);
+    Point[] r = Blocks.Relatives(s);
     int cx, cy;
     for (int i = 0; i < r.Length; i++)
     {
@@ -98,7 +119,7 @@ public class Board : MonoBehaviour
       cells[s.x + cx, s.y + cy].id = Blocks.empty;
     }
   }
-  bool IsEmpty(int x, int y, XY[] r)
+  bool IsEmpty(int x, int y, Point[] r)
   {
     int b = cells[x, y].id;
     if (b != Blocks.empty) return false;
@@ -119,7 +140,7 @@ public class Board : MonoBehaviour
     Hide();
     int nx = s.x + x;
     int ny = s.y + y;
-    XY[] r = Blocks.Relatives(s);
+    Point[] r = Blocks.Relatives(s);
     bool move = IsEmpty(nx, ny, r);
     if (move) { s.x = nx; s.y = ny; }
     Fix();
@@ -132,7 +153,7 @@ public class Board : MonoBehaviour
     Hide();
     int cr = s.rotate;
     s.Rotate();
-    XY[] r = Blocks.Relatives(s);
+    Point[] r = Blocks.Relatives(s);
     if (!IsEmpty(s.x, s.y, r))
     {
       s.rotate = cr; // rollback
@@ -147,7 +168,7 @@ public class Board : MonoBehaviour
   }
   internal void Drop()
   {
-    frm = 0;
+    frame = 0;
     if (Move(0, -1)) return;
     //-> dropped. no space to move.
     if (del.Check())
@@ -166,6 +187,16 @@ public class Board : MonoBehaviour
       for (int x = minX; x < maxX; x++)
       {
         cells[x, y].Render();
+      }
+    }
+  }
+  void DeleteAll()
+  {
+    for (int y = minY; y < maxY; y++)
+    {
+      for (int x = minX; x < maxX; x++)
+      {
+        cells[x, y].id = Blocks.empty;
       }
     }
   }

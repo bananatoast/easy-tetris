@@ -10,10 +10,10 @@ public class Cells : MonoBehaviour
     next = new Cell[4, 10],
     main = new Cell[12, 24];
   List<GameObject> cells = new List<GameObject>();
-  Controller c;
-  internal void Init(Controller ctrl)
+  Colors colors;
+  internal void Init(Colors colors)
   {
-    c = ctrl;
+    this.colors = colors;
     //-> init grid and cells
     const float
       left = -2f, bottom = -3.790f,
@@ -62,15 +62,15 @@ public class Cells : MonoBehaviour
   }
   Cell Back(float x, float y)
   {
-    return Create(Blocks.empty, x, y, c.colors.back);
+    return Create(Blocks.empty, x, y, colors.back);
   }
   Cell Empty(float x, float y)
   {
-    return Create(Blocks.empty, x, y, c.colors.empty);
+    return Create(Blocks.empty, x, y, colors.empty);
   }
   Cell Wall(float x, float y)
   {
-    return Create(Blocks.wall, x, y, c.colors.wall);
+    return Create(Blocks.wall, x, y, colors.wall);
   }
   Cell Create(int id, float x, float y, Color clr)
   {
@@ -82,7 +82,7 @@ public class Cells : MonoBehaviour
     Vector2 pos = s.transform.position;
     pos.x = x; pos.y = y;
     s.transform.position = pos;
-    return new Cell(id, s, c.colors);
+    return new Cell(id, s, colors);
   }
   internal void Disable()
   {

@@ -79,7 +79,7 @@ public class Next
   }
   internal void Hide()
   {
-    Status s; XY[] r;
+    Status s; Point[] r;
     int rx, ry;
     for (int j = 0; j < 3; j++)
     {
@@ -95,7 +95,7 @@ public class Next
   }
   void Show()
   {
-    Status s; XY[] r;
+    Status s; Point[] r;
     int rx, ry, ny = 8;
     for (int i = 0; i < 3; i++)
     {
