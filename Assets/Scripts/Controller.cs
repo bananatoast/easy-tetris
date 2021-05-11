@@ -7,8 +7,8 @@ public class Controller : MonoBehaviour
 {
   public Camera cam;
   public Canvas canvas;
-  public Colors colors;
-  public Cells cells;
+  // public Colors colors;
+  // public Cells cells;
   public Board board;
   public Score score;
   public GameOver gameOver;
@@ -25,12 +25,10 @@ public class Controller : MonoBehaviour
     gameOver.RestartEvent += OnRestart;
     gameOver.QuitEvent += OnQuit;
 
-    colors.Init(cam.backgroundColor);
-    cells.Init(colors);
-    board.Init(cells);
-    board.DropFrame = frame;
+    // colors.Init(cam.backgroundColor);
+    // cells.Init(colors);
     score.Reset();
-    board.Render();
+    board.Init(frame);
 
     ready.Activate();
   }
@@ -55,7 +53,7 @@ public class Controller : MonoBehaviour
   }
   void OnQuit(object sender, EventArgs e)
   {
-    cells.Disable();
+    // cells.Disable();
     canvas.gameObject.SetActive(false);
 #if UNITY_EDITOR
       UnityEditor.EditorApplication.isPlaying = false;

@@ -11,7 +11,7 @@ public class DeletedEventArgs : EventArgs
   }
   public int Lines { get; set; }
 }
-public class Delete : MonoBehaviour
+public class DeleteBehaviour : MonoBehaviour
 {
   public event EventHandler<DeletedEventArgs> DeletedEvent;
   Board board;
@@ -23,7 +23,7 @@ public class Delete : MonoBehaviour
     this.board = board;
     frame = 0;
   }
-  void Update()
+  internal void Update()
   {
     frame++;
     if (frame >= deleteFrame)
@@ -37,27 +37,27 @@ public class Delete : MonoBehaviour
   }
   void Deleting()
   {
-    foreach (int y in lines)
-    {
-      for (int x = board.minX; x < board.maxX; x++)
-      {
-        board.cells[x, y].AddAlpha(-0.03f);
-      }
-    }
+    // foreach (int y in lines)
+    // {
+    //   for (int x = board.minX; x < board.maxX; x++)
+    //   {
+    //     board.cells[x, y].AddAlpha(-0.03f);
+    //   }
+    // }
   }
   void Complete()
   {
     int count = lines.Count;
-    for (int i = 0; i < count; i++)
-    {
-      for (int y = lines[i] - i; y < board.maxY; y++)
-      {
-        for (int x = board.minX; x < board.maxX; x++)
-        {
-          board.cells[x, y].id = board.cells[x, y + 1].id;
-        }
-      }
-    }
+    // for (int i = 0; i < count; i++)
+    // {
+    //   for (int y = lines[i] - i; y < board.maxY; y++)
+    //   {
+    //     for (int x = board.minX; x < board.maxX; x++)
+    //     {
+    //       board.cells[x, y].id = board.cells[x, y + 1].id;
+    //     }
+    //   }
+    // }
     frame = 0;
     lines.Clear();
     gameObject.SetActive(false);
@@ -74,14 +74,14 @@ public class Delete : MonoBehaviour
   }
   internal bool Check()
   {
-    for (int y = board.minY; y < board.maxY; y++)
-    {
-      for (int x = board.minX; x < board.maxX; x++)
-      {
-        if (board.cells[x, y].id == Blocks.empty) break;
-        if (x == 10) lines.Add(y);
-      }
-    }
+    // for (int y = board.minY; y < board.maxY; y++)
+    // {
+    //   for (int x = board.minX; x < board.maxX; x++)
+    //   {
+    //     if (board.cells[x, y].id == Block.empty) break;
+    //     if (x == 10) lines.Add(y);
+    //   }
+    // }
     if (lines.Count == 0)
     {
       board.Next();

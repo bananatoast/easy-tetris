@@ -5,66 +5,74 @@ using UnityEngine;
 
 public class Board : MonoBehaviour
 {
-  public Delete del;
+  static int Width = 12;
+  static int Height = 24;
+  public GameObject prefab;
+  public DeleteBehaviour deleteBehaviour;
   public AudioClip soundDrop;
   public AudioClip soundDelete;
   public AudioSource audioSource;
   public event EventHandler GameOverEvent;
   public event EventHandler<DeletedEventArgs> DeletedEvent;
-  internal Cell[,] cells;
-  internal int minX = 1, maxX, minY = 1, maxY;
-  Status s = new Status();
-  Next next = new Next();
+  private Cell[,] cells;
+  private Block block;
+  // Next next = new Next();
   bool insert;
-  int frame;
-  int dropFrame = 60;
-  int fastFrame;
-  internal int DropFrame
+  private int frame;
+  internal int FastFrame { get; set; }
+  internal int DropFrame { get; set; }
+  internal void Init(int dropFrame)
   {
-    set { this.dropFrame = value; }
-    get { return this.dropFrame; }
-  }
-  internal void Init(Cells c)
-  {
-    fastFrame = dropFrame / 2;
-    cells = c.main;
-    maxX = cells.GetLength(0) - 1;
-    maxY = cells.GetLength(1) - 2;
-    del.Init(this);
-    del.DeletedEvent += DeletedEvent;
-    next.Init(c.next);
+    DropFrame = dropFrame;
+    FastFrame = DropFrame / 2;
+    cells = new Cell[Width, Height];
+    BuildStage();
+    deleteBehaviour.Init(this);
+    deleteBehaviour.DeletedEvent += OnDeletedEvent;
+    // next.Init(c.next);
     insert = false;
     frame = 0;
     Next();
+  }
+  private void BuildStage()
+  {
+    for (int y = 0; y < Height; y++)
+    {
+      for (int x = 0; x < Width; x++)
+      {
+        GameObject obj = Instantiate(prefab);
+        var position = new Vector2(-2f + x * 0.355f, -3.790f + y * 0.355f);
+        cells[x, y] = (x == 0 || x == Width - 1 || y == 0) ?
+          new Cell(State.Wall, obj, position) : new Cell(State.Empty, obj, position);
+      }
+    }
   }
   internal void Reset()
   {
     insert = false;
     frame = 0;
-    next.Hide();
-    next.Reset();
+    // next.Hide();
+    // next.Reset();
     DeleteAll();
 
     Next();
     gameObject.SetActive(false);
-    Render();
   }
   void Update()
   {
     frame++;
     HandleInput();
-    if (frame >= dropFrame)
+    if (frame >= DropFrame)
     {
       Drop();
     }
-    Render();
   }
   internal void HandleInput()
   {
     Key.Handle();
     if (Key.PressingDown())
     {
-      if (!insert) frame += fastFrame;
+      if (!insert) frame += FastFrame;
     }
     else
     {
@@ -83,120 +91,86 @@ public class Board : MonoBehaviour
       Rotate();
     }
   }
-  void Insert()
+  private void Transcribe()
   {
-    s.XY(5, 20); // first place
-    if (s.id == Blocks.i) s.y++;
-    s.ResetRotate();
-    insert = true;
-    //-> check collision
-    Point[] r = Blocks.Relatives(s);
-    if (!IsEmpty(s.x, s.y, r))
+    foreach (var point in block.Current)
     {
+      var cell = cells[block.Position.X + point.X, block.Position.Y + point.Y];
+      cell.State = (State)block.Type;
+    }
+  }
+  private bool IsEmpty(Point position, Point[] shape)
+  {
+    bool isEmpty = true;
+    foreach (var point in shape)
+    {
+      isEmpty = isEmpty && cells[position.X + point.X, position.Y + point.Y].State == State.Empty;
+    }
+    return isEmpty;
+  }
+  private bool Move(int dx, int dy)
+  {
+    Point nextPosition = block.Position.Add(dx, dy);
+    if (IsEmpty(nextPosition, block.Current))
+    {
+      block.Move(dx, dy);
+      return true;
+    }
+    return false;
+  }
+
+  private bool Rotate()
+  {
+    if (IsEmpty(block.Position, block.Rotate(false)))
+    {
+      block.Rotate();
+      return true;
+    }
+    return false;
+  }
+  internal void Next()
+  {
+    // TODO pull from Next stage
+    GameObject[] objects = { Instantiate(prefab), Instantiate(prefab), Instantiate(prefab), Instantiate(prefab) };
+    block = gameObject.AddComponent<Block>() as Block;
+    block.Init(objects, new Point(Width / 2 - 1, Height - 2));
+    if (!IsEmpty(block.Position, block.Current))
+    {
+      block.Destroy();
       gameObject.SetActive(false);
       GameOverEvent(this, null);
     }
   }
-  void Fix()
-  {
-    cells[s.x, s.y].id = s.id;
-    Point[] r = Blocks.Relatives(s);
-    int cx, cy;
-    for (int i = 0; i < r.Length; i++)
-    {
-      cx = r[i].x; cy = r[i].y;
-      cells[s.x + cx, s.y + cy].id = s.id;
-    }
-  }
-  void Hide()
-  {
-    cells[s.x, s.y].id = Blocks.empty;
-    Point[] r = Blocks.Relatives(s);
-    int cx, cy;
-    for (int i = 0; i < r.Length; i++)
-    {
-      cx = r[i].x; cy = r[i].y;
-      cells[s.x + cx, s.y + cy].id = Blocks.empty;
-    }
-  }
-  bool IsEmpty(int x, int y, Point[] r)
-  {
-    int b = cells[x, y].id;
-    if (b != Blocks.empty) return false;
-    int rX, rY;
-    for (int i = 0; i < r.Length; i++)
-    {
-      rX = r[i].x; rY = r[i].y;
-      b = cells[x + rX, y + rY].id;
-      if (b != Blocks.empty)
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-  internal bool Move(int x, int y)
-  {
-    Hide();
-    int nx = s.x + x;
-    int ny = s.y + y;
-    Point[] r = Blocks.Relatives(s);
-    bool move = IsEmpty(nx, ny, r);
-    if (move) { s.x = nx; s.y = ny; }
-    Fix();
-    return move;
-  }
-
-  internal void Rotate()
-  {
-    if (s.id == Blocks.o) return; // none
-    Hide();
-    int cr = s.rotate;
-    s.Rotate();
-    Point[] r = Blocks.Relatives(s);
-    if (!IsEmpty(s.x, s.y, r))
-    {
-      s.rotate = cr; // rollback
-    }
-    Fix();
-  }
-  internal void Next()
-  {
-    s.id = next.Id();
-    Insert();
-    Fix();
-  }
-  internal void Drop()
+  private void Drop()
   {
     frame = 0;
-    if (Move(0, -1)) return;
-    //-> dropped. no space to move.
-    if (del.Check())
+    if (!Move(0, -1))
     {
-      audioSource.PlayOneShot(soundDelete);
-    }
-    else
-    {
-      audioSource.PlayOneShot(soundDrop);
-    }
-  }
-  internal void Render()
-  {
-    for (int y = minY; y < maxY; y++)
-    {
-      for (int x = minX; x < maxX; x++)
+      Transcribe();
+      block.Destroy();
+      // if (deleteBehaviour.TryDeleting(cells))
+      if (deleteBehaviour.Check())
       {
-        cells[x, y].Render();
+        gameObject.SetActive(false);
+        audioSource.PlayOneShot(soundDelete);
+      }
+      else
+      {
+        audioSource.PlayOneShot(soundDrop);
       }
     }
   }
-  void DeleteAll()
+  void OnDeletedEvent(object sender, DeletedEventArgs e)
   {
-    for (int y = minY; y < maxY; y++)
+    DeletedEvent(this, e);
+  }
+  private void DeleteAll()
+  {
+    for (int y = 1; y < Height; y++)
     {
-      for (int x = minX; x < maxX; x++)
+      for (int x = 1; x < Width - 1; x++)
       {
-        cells[x, y].id = Blocks.empty;
+        cells[x, y].Clean();
       }
     }
   }
