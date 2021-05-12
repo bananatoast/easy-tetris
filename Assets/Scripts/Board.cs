@@ -14,8 +14,10 @@ public class Board : MonoBehaviour
   public AudioSource audioSource;
   public event EventHandler GameOverEvent;
   public event EventHandler<DeletedEventArgs> DeletedEvent;
+  private static Point NextLanePosition = new Point(Width + 2, Height - 7);
   private Cell[,] cells;
   private Block block;
+  private List<Block> nextQueue;
   private int frame;
   internal int FastFrame { get; set; }
   internal int DropFrame { get; set; }
@@ -27,7 +29,25 @@ public class Board : MonoBehaviour
     BuildStage();
     deleteBehaviour.DeletedEvent += OnDeletedEvent;
     frame = 0;
+    nextQueue = new List<Block>();
+    for (int i = 0; i < 3; i++) EnqueueBlock();
     Next();
+  }
+  private void EnqueueBlock()
+  {
+    var order = nextQueue.Count;
+    GameObject[] objects = { Instantiate(prefab), Instantiate(prefab), Instantiate(prefab), Instantiate(prefab) };
+    var newBlock = gameObject.AddComponent<Block>() as Block;
+    newBlock.Init(objects, NextLanePosition.Add(0, -3 * order));
+    nextQueue.Add(newBlock);
+  }
+  private Block DequeueBlock()
+  {
+    var next = nextQueue[0];
+    nextQueue.RemoveAt(0);
+    nextQueue.ForEach(b => b.Move(0, 3));
+    EnqueueBlock();
+    return next;
   }
   private void BuildStage()
   {
@@ -119,10 +139,8 @@ public class Board : MonoBehaviour
   }
   internal void Next()
   {
-    // TODO pull from Next stage
-    GameObject[] objects = { Instantiate(prefab), Instantiate(prefab), Instantiate(prefab), Instantiate(prefab) };
-    block = gameObject.AddComponent<Block>() as Block;
-    block.Init(objects, new Point(Width / 2 - 1, Height - 2));
+    block = DequeueBlock();
+    block.Move(Width / 2 - NextLanePosition.X, Height - 2 - NextLanePosition.Y);
     if (!IsEmpty(block.Position, block.Current))
     {
       block.Destroy();
