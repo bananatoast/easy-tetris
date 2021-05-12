@@ -16,8 +16,6 @@ public class Board : MonoBehaviour
   public event EventHandler<DeletedEventArgs> DeletedEvent;
   private Cell[,] cells;
   private Block block;
-  // Next next = new Next();
-  bool insert;
   private int frame;
   internal int FastFrame { get; set; }
   internal int DropFrame { get; set; }
@@ -28,8 +26,6 @@ public class Board : MonoBehaviour
     cells = new Cell[Width, Height + 3];
     BuildStage();
     deleteBehaviour.DeletedEvent += OnDeletedEvent;
-    // next.Init(c.next);
-    insert = false;
     frame = 0;
     Next();
   }
@@ -48,10 +44,7 @@ public class Board : MonoBehaviour
   }
   internal void Reset()
   {
-    insert = false;
     frame = 0;
-    // next.Hide();
-    // next.Reset();
     DeleteAll();
 
     Next();
@@ -71,11 +64,7 @@ public class Board : MonoBehaviour
     Key.Handle();
     if (Key.PressingDown())
     {
-      if (!insert) frame += FastFrame;
-    }
-    else
-    {
-      insert = false;
+      frame += FastFrame;
     }
     if (Key.Left())
     {
@@ -157,13 +146,14 @@ public class Board : MonoBehaviour
       else
       {
         audioSource.PlayOneShot(soundDrop);
+        Next();
       }
-      Next();
     }
   }
   void OnDeletedEvent(object sender, DeletedEventArgs e)
   {
     gameObject.SetActive(true);
+    Next();
     DeletedEvent(this, e);
   }
   private void DeleteAll()

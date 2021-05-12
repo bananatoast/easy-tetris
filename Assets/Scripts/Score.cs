@@ -5,23 +5,22 @@ using UnityEngine.UI;
 
 public class Score : MonoBehaviour
 {
-  public Text txtScore;
-  int score;
+  public Text ScoreText;
+  private int score = 0;
+  private int ScoreValue
+  {
+    get { return score; }
+    set { score = value; ScoreText.text = score.ToString(); }
+  }
   internal void Reset()
   {
-    score = 0;
-    Render();
+    ScoreValue = 0;
   }
   internal void Add(int lines)
   {
-    if (lines == 1) score += 40;
-    else if (lines == 2) score += 100;
-    else if (lines == 3) score += 300;
-    else if (lines == 4) score += 1200;
-    Render();
-  }
-  void Render()
-  {
-    txtScore.text = score.ToString();
+    if (lines == 1) ScoreValue += 40;
+    else if (lines == 2) ScoreValue += 100;
+    else if (lines == 3) ScoreValue += 300;
+    else if (lines == 4) ScoreValue += 1200;
   }
 }
