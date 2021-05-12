@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class Board : MonoBehaviour
 {
-  static int Width = 12;
-  static int Height = 24;
+  public static int Width = 12;
+  public static int Height = 24;
   public GameObject prefab;
   public DeleteBehaviour deleteBehaviour;
   public AudioClip soundDrop;
@@ -14,7 +14,7 @@ public class Board : MonoBehaviour
   public AudioSource audioSource;
   public event EventHandler GameOverEvent;
   public event EventHandler<DeletedEventArgs> DeletedEvent;
-  private Cell[][] cells;
+  private Cell[,] cells;
   private Block block;
   // Next next = new Next();
   bool insert;
@@ -25,7 +25,7 @@ public class Board : MonoBehaviour
   {
     DropFrame = dropFrame;
     FastFrame = DropFrame / 2;
-    cells = new Cell[Height][];
+    cells = new Cell[Width, Height + 3];
     BuildStage();
     deleteBehaviour.DeletedEvent += OnDeletedEvent;
     // next.Init(c.next);
@@ -37,12 +37,11 @@ public class Board : MonoBehaviour
   {
     for (int y = 0; y < Height; y++)
     {
-      cells[y] = new Cell[Width];
       for (int x = 0; x < Width; x++)
       {
         GameObject obj = Instantiate(prefab);
         var position = new Vector2(-2f + x * 0.355f, -3.790f + y * 0.355f);
-        cells[y][x] = (x == 0 || x == Width - 1 || y == 0) ?
+        cells[x, y] = (x == 0 || x == Width - 1 || y == 0) ?
           new Cell(State.Wall, obj, position) : new Cell(State.Empty, obj, position);
       }
     }
@@ -95,7 +94,7 @@ public class Board : MonoBehaviour
   {
     foreach (var point in block.Current)
     {
-      var cell = cells[block.Position.Y + point.Y][block.Position.X + point.X];
+      var cell = cells[block.Position.X + point.X, block.Position.Y + point.Y];
       cell.State = (State)block.Type;
     }
   }
@@ -104,8 +103,8 @@ public class Board : MonoBehaviour
     bool isEmpty = true;
     foreach (var point in shape)
     {
-      var cell = cells[position.Y + point.Y][position.X + point.X];
-      isEmpty = isEmpty && cell.State == State.Empty;
+      var cell = cells[position.X + point.X, position.Y + point.Y];
+      isEmpty = isEmpty && (cell == null || cell.State == State.Empty);
     }
     return isEmpty;
   }
@@ -173,7 +172,7 @@ public class Board : MonoBehaviour
     {
       for (int x = 1; x < Width - 1; x++)
       {
-        cells[y][x].State = State.Empty;
+        cells[x, y].State = State.Empty;
       }
     }
   }

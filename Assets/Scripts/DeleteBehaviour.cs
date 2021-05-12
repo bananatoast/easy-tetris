@@ -17,7 +17,7 @@ public class DeleteBehaviour : MonoBehaviour
   private int frame;
   private static int deleteFrame = 30;
   private List<int> deletable;
-  private Cell[][] cells;
+  private Cell[,] cells;
 
   internal void Update()
   {
@@ -35,10 +35,9 @@ public class DeleteBehaviour : MonoBehaviour
   {
     foreach (int y in deletable)
     {
-      Cell[] row = cells[y];
-      for (int x = 1; x < row.Length - 1; x++)
+      for (int x = 1; x < Board.Width - 1; x++)
       {
-        row[x].AddAlpha(-0.03f);
+        cells[x, y].AddAlpha(-0.03f);
       }
     }
   }
@@ -48,16 +47,15 @@ public class DeleteBehaviour : MonoBehaviour
     deletable.Reverse();
     foreach (int r in deletable)
     {
-      Cell[] row = cells[r];
-      for (int x = 1; x < row.Length - 1; x++)
+      for (int x = 1; x < Board.Width - 1; x++)
       {
-        row[x].State = State.Empty;
+        cells[x, r].State = State.Empty;
       }
-      for (int y = r; y < cells.Length - 1; y++)
+      for (int y = r; y < Board.Height - 1; y++)
       {
-        for (int x = 1; x < cells[y].Length - 1; x++)
+        for (int x = 1; x < Board.Width - 1; x++)
         {
-          cells[y][x].State = cells[y + 1][x].State;
+          cells[x, y].State = cells[x, y + 1].State;
         }
       }
     }
@@ -69,16 +67,15 @@ public class DeleteBehaviour : MonoBehaviour
     frame = 0;
     gameObject.SetActive(true);
   }
-  internal bool TryDeleting(Cell[][] cells)
+  internal bool TryDeleting(Cell[,] cells)
   {
     var deletable = new List<int>();
-    for (int y = 1; y < cells.Length; y++)
+    for (int y = 1; y < Board.Height; y++)
     {
-      Cell[] row = cells[y];
       bool filled = true;
-      for (int x = 1; x < row.Length - 1; x++)
+      for (int x = 1; x < Board.Width - 1; x++)
       {
-        filled = filled && (row[x].State != State.Empty);
+        filled = filled && (cells[x, y].State != State.Empty);
       }
       if (filled)
       {
