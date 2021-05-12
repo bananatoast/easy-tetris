@@ -14,7 +14,7 @@ public class Board : MonoBehaviour
   public AudioSource audioSource;
   public event EventHandler GameOverEvent;
   public event EventHandler<DeletedEventArgs> DeletedEvent;
-  private Cell[,] cells;
+  private Cell[][] cells;
   private Block block;
   // Next next = new Next();
   bool insert;
@@ -25,9 +25,8 @@ public class Board : MonoBehaviour
   {
     DropFrame = dropFrame;
     FastFrame = DropFrame / 2;
-    cells = new Cell[Width, Height];
+    cells = new Cell[Height][];
     BuildStage();
-    deleteBehaviour.Init(this);
     deleteBehaviour.DeletedEvent += OnDeletedEvent;
     // next.Init(c.next);
     insert = false;
@@ -38,11 +37,12 @@ public class Board : MonoBehaviour
   {
     for (int y = 0; y < Height; y++)
     {
+      cells[y] = new Cell[Width];
       for (int x = 0; x < Width; x++)
       {
         GameObject obj = Instantiate(prefab);
         var position = new Vector2(-2f + x * 0.355f, -3.790f + y * 0.355f);
-        cells[x, y] = (x == 0 || x == Width - 1 || y == 0) ?
+        cells[y][x] = (x == 0 || x == Width - 1 || y == 0) ?
           new Cell(State.Wall, obj, position) : new Cell(State.Empty, obj, position);
       }
     }
@@ -95,7 +95,7 @@ public class Board : MonoBehaviour
   {
     foreach (var point in block.Current)
     {
-      var cell = cells[block.Position.X + point.X, block.Position.Y + point.Y];
+      var cell = cells[block.Position.Y + point.Y][block.Position.X + point.X];
       cell.State = (State)block.Type;
     }
   }
@@ -104,7 +104,8 @@ public class Board : MonoBehaviour
     bool isEmpty = true;
     foreach (var point in shape)
     {
-      isEmpty = isEmpty && cells[position.X + point.X, position.Y + point.Y].State == State.Empty;
+      var cell = cells[position.Y + point.Y][position.X + point.X];
+      isEmpty = isEmpty && cell.State == State.Empty;
     }
     return isEmpty;
   }
@@ -148,20 +149,22 @@ public class Board : MonoBehaviour
     {
       Transcribe();
       block.Destroy();
-      // if (deleteBehaviour.TryDeleting(cells))
-      if (deleteBehaviour.Check())
+      if (deleteBehaviour.TryDeleting(cells))
       {
         gameObject.SetActive(false);
         audioSource.PlayOneShot(soundDelete);
+        deleteBehaviour.StartDeleting();
       }
       else
       {
         audioSource.PlayOneShot(soundDrop);
       }
+      Next();
     }
   }
   void OnDeletedEvent(object sender, DeletedEventArgs e)
   {
+    gameObject.SetActive(true);
     DeletedEvent(this, e);
   }
   private void DeleteAll()
@@ -170,7 +173,7 @@ public class Board : MonoBehaviour
     {
       for (int x = 1; x < Width - 1; x++)
       {
-        cells[x, y].Clean();
+        cells[y][x].State = State.Empty;
       }
     }
   }

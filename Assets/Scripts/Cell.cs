@@ -65,9 +65,4 @@ class Cell
     color.a = color.a + alpha;
     renderer.color = color;
   }
-  internal void Clean()
-  {
-    renderer.color = Colors.Get(State.Empty);
-    State = State.Empty;
-  }
 }
