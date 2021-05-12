@@ -140,7 +140,7 @@ public class Board : MonoBehaviour
   internal void Next()
   {
     block = DequeueBlock();
-    block.Move(Width / 2 - NextLanePosition.X, Height - 2 - NextLanePosition.Y);
+    block.Move(Width / 2 - 1 - NextLanePosition.X, Height - 2 - NextLanePosition.Y);
     if (!IsEmpty(block.Position, block.Current))
     {
       block.Destroy();
