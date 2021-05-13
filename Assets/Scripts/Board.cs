@@ -8,9 +8,9 @@ public class Board : MonoBehaviour
   public static int Width = 12;
   public static int Height = 24;
   public GameObject prefab;
-  public DeleteBehaviour deleteBehaviour;
+  public DeleteBehaviour deleter;
+  public CompressorBehaviour compressor;
   public AudioClip soundDrop;
-  public AudioClip soundDelete;
   public AudioSource audioSource;
   public event EventHandler GameOverEvent;
   public event EventHandler<DeletedEventArgs> DeletedEvent;
@@ -27,7 +27,8 @@ public class Board : MonoBehaviour
     FastFrame = DropFrame / 2;
     cells = new Cell[Width, Height + 3];
     BuildStage();
-    deleteBehaviour.DeletedEvent += OnDeletedEvent;
+    deleter.DeletedEvent += OnDeletedEvent;
+    compressor.CompressedEvent += OnCompressedEvent;
     frame = 0;
     nextQueue = new List<Block>();
     for (int i = 0; i < 3; i++) EnqueueBlock();
@@ -153,18 +154,24 @@ public class Board : MonoBehaviour
     frame = 0;
     if (!Move(0, -1))
     {
-      Transcribe();
-      block.Destroy();
-      if (deleteBehaviour.TryDeleting(cells))
+      if (block.Type == BlockType.COMPRESSOR)
       {
-        gameObject.SetActive(false);
-        audioSource.PlayOneShot(soundDelete);
-        deleteBehaviour.StartDeleting();
+        compressor.StartCompressing(block, cells);
       }
       else
       {
-        audioSource.PlayOneShot(soundDrop);
-        Next();
+        Transcribe();
+        block.Destroy();
+        if (deleter.TryDeleting(cells))
+        {
+          gameObject.SetActive(false);
+          deleter.StartDeleting();
+        }
+        else
+        {
+          audioSource.PlayOneShot(soundDrop);
+          Next();
+        }
       }
     }
   }
@@ -173,6 +180,20 @@ public class Board : MonoBehaviour
     gameObject.SetActive(true);
     Next();
     DeletedEvent(this, e);
+  }
+  void OnCompressedEvent(object sender, EventArgs e)
+  {
+    block.Destroy();
+    gameObject.SetActive(true);
+    if (deleter.TryDeleting(cells))
+    {
+      gameObject.SetActive(false);
+      deleter.StartDeleting();
+    }
+    else
+    {
+      Next();
+    }
   }
   private void DeleteAll()
   {

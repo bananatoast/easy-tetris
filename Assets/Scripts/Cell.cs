@@ -33,7 +33,8 @@ class Colors
     new Color(0.9568f, 0.2627f, 0.2117f, 1.0f), //Z
     new Color(0.2470f, 0.3176f, 0.7098f, 1.0f), //J
     new Color(1.0f, 0.5960f, 1.0f, 1.0f), //L
-    new Color(0.7098f, 0.2392f, 0.7686f, 1.0f)  //T
+    new Color(0.7098f, 0.2392f, 0.7686f, 1.0f),  //T
+    new Color(1.0f, 1.0f, 1.0f, 1.0f),  //COMPACT
   };
 }
 class Cell

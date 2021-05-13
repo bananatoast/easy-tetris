@@ -10,7 +10,8 @@ enum BlockType : int
   Z = 5,
   J = 6,
   L = 7,
-  T = 8
+  T = 8,
+  COMPRESSOR = 9
 }
 struct Point
 {
@@ -48,7 +49,13 @@ class Block : MonoBehaviour
   internal BlockType Type { get { return type; } }
   internal Point[] Current { get { return rotations[rotation]; } }
   internal Point Position { get { return position; } }
-
+  void Update()
+  {
+    if (type == BlockType.COMPRESSOR)
+    {
+      cells.ForEach(c => c.State = (c.State >= State.T) ? State.I : c.State + 1);
+    }
+  }
   internal Point[] Rotate(bool destructive = true)
   {
     int r = (rotation == rotations.Length - 1) ? 0 : rotation + 1;
@@ -125,11 +132,18 @@ class Block : MonoBehaviour
         new Point[] { new Point(0, 0), new Point(0, -1), new Point(-1, 0), new Point(1, 0) },
         new Point[] { new Point(0, 0), new Point(0, -1), new Point(-1, 0), new Point(0, 1) }
       }
+    },
+    {
+      BlockType.COMPRESSOR,
+      new Point[][] {
+        new Point[] { new Point(0, 0), new Point(1, 0), new Point(0, 1), new Point(1, 1) }
+      }
     }
   };
   internal void Init(GameObject[] objects, Point position)
   {
     this.type = (BlockType)Random.Range(2, 9);
+    if (Random.Range(0, 4) == 0) this.type = BlockType.COMPRESSOR;
     this.rotations = shapes[this.type];
     this.rotation = 0;
     this.color = Colors.Get(this.type);

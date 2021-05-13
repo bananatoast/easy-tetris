@@ -14,6 +14,8 @@ public class DeletedEventArgs : EventArgs
 public class DeleteBehaviour : MonoBehaviour
 {
   public event EventHandler<DeletedEventArgs> DeletedEvent;
+  public AudioClip soundDelete;
+  public AudioSource audioSource;
   private int frame;
   private static int deleteFrame = 30;
   private List<int> deletable;
@@ -64,6 +66,7 @@ public class DeleteBehaviour : MonoBehaviour
   }
   internal void StartDeleting()
   {
+    audioSource.PlayOneShot(soundDelete);
     frame = 0;
     gameObject.SetActive(true);
   }
