@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
+  public int StartingFrameRate = 60;
   public Camera cam;
   public Canvas canvas;
   public Board board;
@@ -17,7 +18,7 @@ public class GameController : MonoBehaviour
   private int score;
   void Start()
   {
-    frame = 60;
+    frame = StartingFrameRate;
     score = 0;
     Application.targetFrameRate = frame;
     board.GameOverEvent += OnGameOver;
@@ -37,11 +38,25 @@ public class GameController : MonoBehaviour
   }
   void OnDeleted(object sender, DeletedEventArgs e)
   {
-    if (e.Lines == 1) score += 40;
-    else if (e.Lines == 2) score += 100;
-    else if (e.Lines == 3) score += 300;
-    else score += e.Lines * 300;
+    Scoring(e.Lines);
+    ChangeSpeed(score);
+  }
+  private void Scoring(int lines)
+  {
+    if (lines == 1) score += 40;
+    else if (lines == 2) score += 100;
+    else if (lines == 3) score += 300;
+    else score += lines * 300;
     ScoreText.text = score.ToString();
+  }
+  private void ChangeSpeed(int score)
+  {
+    if (score > 8000) frame = (int)(StartingFrameRate * 0.2);
+    else if (score > 5000) frame = (int)(StartingFrameRate * 0.3);
+    else if (score > 3000) frame = (int)(StartingFrameRate * 0.5);
+    else if (score > 1500) frame = (int)(StartingFrameRate * 0.7);
+    else if (score > 500) frame = (int)(StartingFrameRate * 0.9);
+    board.DropFrame = frame;
   }
   void OnGameOver(object sender, EventArgs e)
   {
@@ -49,7 +64,8 @@ public class GameController : MonoBehaviour
   }
   void OnRestart(object sender, EventArgs e)
   {
-    board.Reset();
+    frame = StartingFrameRate;
+    board.Reset(frame);
     score = 0;
     ready.Activate();
   }

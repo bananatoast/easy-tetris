@@ -28,7 +28,7 @@ public class CompressorBehaviour : MonoBehaviour
       {
         foreach (var p in compressable)
         {
-          for (int y = p.Y; y < block.Position.Y + 2; y++)
+          for (int y = p.Y; y < block.Position.Y + 1; y++)
           {
             cells[p.X, y].State = cells[p.X, y + 1].State;
           }

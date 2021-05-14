@@ -19,13 +19,13 @@ public class Board : MonoBehaviour
   private Block block;
   private List<Block> nextQueue;
   private int frame;
-  internal int FastFrame { get; set; }
   internal int DropFrame { get; set; }
+  internal int FastFrame { get { return DropFrame / 2; } }
   private bool deletingOrCompressing;
   internal void Init(int dropFrame)
   {
     DropFrame = dropFrame;
-    FastFrame = DropFrame / 2;
+    // FastFrame = DropFrame / 2;
     cells = new Cell[Width, Height + 3];
     BuildStage();
     deleter.DeletedEvent += OnDeletedEvent;
@@ -80,11 +80,11 @@ public class Board : MonoBehaviour
       }
     }
   }
-  internal void Reset()
+  internal void Reset(int dropFrame)
   {
+    DropFrame = dropFrame;
     frame = 0;
     DeleteAll();
-
     Next();
     gameObject.SetActive(false);
   }
