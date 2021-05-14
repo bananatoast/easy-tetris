@@ -39,8 +39,23 @@ public class Board : MonoBehaviour
     var order = nextQueue.Count;
     GameObject[] objects = { Instantiate(prefab), Instantiate(prefab), Instantiate(prefab), Instantiate(prefab) };
     var newBlock = gameObject.AddComponent<Block>() as Block;
-    newBlock.Init(objects, NextLanePosition.Add(0, -3 * order));
+
+    newBlock.Init(objects, NextLanePosition.Add(0, -3 * order), CalcCompressorChance());
     nextQueue.Add(newBlock);
+  }
+  private float CalcCompressorChance()
+  {
+    int filledCount = 0;
+    // crisis := many blocks in top half
+    for (int y = Height / 2; y < Height; y++)
+    {
+      for (int x = 1; x < Width - 1; x++)
+      {
+        if (cells[x, y].State != State.Empty) filledCount++;
+      }
+    }
+    float chance = (float)filledCount / ((Width - 2) * (Height - 2) / 2);
+    return chance;
   }
   private Block DequeueBlock()
   {

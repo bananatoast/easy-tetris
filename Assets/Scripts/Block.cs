@@ -140,10 +140,9 @@ class Block : MonoBehaviour
       }
     }
   };
-  internal void Init(GameObject[] objects, Point position)
+  internal void Init(GameObject[] objects, Point position, float compressorChance = 0.0f)
   {
-    this.type = (BlockType)Random.Range(2, 9);
-    if (Random.Range(0, 4) == 0) this.type = BlockType.COMPRESSOR;
+    this.type = (Random.Range(0.0f, 1.0f) < compressorChance) ? BlockType.COMPRESSOR : (BlockType)Random.Range(2, 9);
     this.rotations = shapes[this.type];
     this.rotation = 0;
     this.color = Colors.Get(this.type);
