@@ -21,6 +21,7 @@ public class Board : MonoBehaviour
   private int frame;
   internal int FastFrame { get; set; }
   internal int DropFrame { get; set; }
+  private bool deletingOrCompressing;
   internal void Init(int dropFrame)
   {
     DropFrame = dropFrame;
@@ -30,6 +31,7 @@ public class Board : MonoBehaviour
     deleter.DeletedEvent += OnDeletedEvent;
     compressor.CompressedEvent += OnCompressedEvent;
     frame = 0;
+    deletingOrCompressing = false;
     nextQueue = new List<Block>();
     for (int i = 0; i < 3; i++) EnqueueBlock();
     Next();
@@ -88,31 +90,28 @@ public class Board : MonoBehaviour
   }
   void Update()
   {
+    if (deletingOrCompressing) return;
     frame++;
-    HandleInput();
-    if (frame >= DropFrame)
-    {
-      Drop();
-    }
-  }
-  internal void HandleInput()
-  {
-    Key.Handle();
-    if (Key.PressingDown())
+    if (Input.GetKey(KeyCode.DownArrow))
     {
       frame += FastFrame;
     }
-    if (Key.Left())
+    if (Input.GetButtonDown("Horizontal") && Input.GetAxisRaw("Horizontal") == -1)
     {
       Move(-1, 0);
     }
-    else if (Key.Right())
+    else if (Input.GetButtonDown("Horizontal") && Input.GetAxisRaw("Horizontal") == 1)
     {
       Move(1, 0);
     }
-    else if (Key.Rotate())
+    else if (Input.GetButtonDown("Fire3"))
     {
       Rotate();
+    }
+
+    if (frame >= DropFrame)
+    {
+      Drop();
     }
   }
   private void Transcribe()
@@ -171,6 +170,7 @@ public class Board : MonoBehaviour
     {
       if (block.Type == BlockType.COMPRESSOR)
       {
+        deletingOrCompressing = true;
         compressor.StartCompressing(block, cells);
       }
       else
@@ -179,6 +179,7 @@ public class Board : MonoBehaviour
         block.Destroy();
         if (deleter.TryDeleting(cells))
         {
+          deletingOrCompressing = true;
           gameObject.SetActive(false);
           deleter.StartDeleting();
         }
@@ -193,6 +194,7 @@ public class Board : MonoBehaviour
   void OnDeletedEvent(object sender, DeletedEventArgs e)
   {
     gameObject.SetActive(true);
+    deletingOrCompressing = false;
     Next();
     DeletedEvent(this, e);
   }
@@ -200,6 +202,7 @@ public class Board : MonoBehaviour
   {
     block.Destroy();
     gameObject.SetActive(true);
+    deletingOrCompressing = false;
     if (deleter.TryDeleting(cells))
     {
       gameObject.SetActive(false);
