@@ -2,20 +2,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
   public Camera cam;
   public Canvas canvas;
   public Board board;
-  public Score score;
+  public Text ScoreText;
   public GameOver gameOver;
   public ReadyGo ready;
   public AudioSource bgmAudioSource;
-  int frame;
+  private int frame;
+  private int score;
   void Start()
   {
     frame = 60;
+    score = 0;
     Application.targetFrameRate = frame;
     board.GameOverEvent += OnGameOver;
     board.DeletedEvent += OnDeleted;
@@ -23,7 +26,6 @@ public class GameController : MonoBehaviour
     gameOver.RestartEvent += OnRestart;
     gameOver.QuitEvent += OnQuit;
 
-    score.Reset();
     board.Init(frame);
 
     ready.Activate();
@@ -35,7 +37,11 @@ public class GameController : MonoBehaviour
   }
   void OnDeleted(object sender, DeletedEventArgs e)
   {
-    score.Add(e.Lines);
+    if (e.Lines == 1) score += 40;
+    else if (e.Lines == 2) score += 100;
+    else if (e.Lines == 3) score += 300;
+    else score += e.Lines * 300;
+    ScoreText.text = score.ToString();
   }
   void OnGameOver(object sender, EventArgs e)
   {
@@ -44,7 +50,7 @@ public class GameController : MonoBehaviour
   void OnRestart(object sender, EventArgs e)
   {
     board.Reset();
-    score.Reset();
+    score = 0;
     ready.Activate();
   }
   void OnQuit(object sender, EventArgs e)

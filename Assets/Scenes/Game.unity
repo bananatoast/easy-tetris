@@ -850,6 +850,7 @@ MonoBehaviour:
   canvas: {fileID: 2012141940}
   board: {fileID: 973911896}
   score: {fileID: 1389770320}
+  ScoreText: {fileID: 727134495}
   gameOver: {fileID: 1108660502}
   ready: {fileID: 1658598320}
   bgmAudioSource: {fileID: 1497142823}
