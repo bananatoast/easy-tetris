@@ -87,6 +87,7 @@ public class GameController : MonoBehaviour
     frame = StartingFrameRate;
     board.Reset(frame);
     score = 0;
+    ScoreText.text = score.ToString();
     ready.Activate();
   }
   void OnQuit(object sender, EventArgs e)

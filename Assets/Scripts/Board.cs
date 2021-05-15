@@ -112,6 +112,7 @@ public class Board : MonoBehaviour
     DropFrame = dropFrame;
     frame = 0;
     DeleteAll();
+    CleanQueue();
     Next();
     gameObject.SetActive(false);
   }
@@ -248,6 +249,14 @@ public class Board : MonoBehaviour
       {
         cells[x, y].State = State.Empty;
       }
+    }
+  }
+  private void CleanQueue()
+  {
+    for (int i = 0; i < 3; i++)
+    {
+      var queuedBlock = DequeueBlock();
+      queuedBlock.Destroy();
     }
   }
 }
