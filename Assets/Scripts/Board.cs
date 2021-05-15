@@ -2,11 +2,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+public enum Situation
+{
+  Normal = 0,
+  Critical = 1
+}
+public class ChangedSituationEventArgs : EventArgs
+{
+  public ChangedSituationEventArgs(Situation situation)
+  {
+    Situation = situation;
+  }
+  public Situation Situation { get; set; }
+}
 public class Board : MonoBehaviour
 {
   public static int Width = 12;
   public static int Height = 24;
+  public static float CriticalThreshold = 0.25f;
   public GameObject prefab;
   public DeleteBehaviour deleter;
   public CompressorBehaviour compressor;
@@ -14,23 +27,25 @@ public class Board : MonoBehaviour
   public AudioSource audioSource;
   public event EventHandler GameOverEvent;
   public event EventHandler<DeletedEventArgs> DeletedEvent;
+  public event EventHandler<ChangedSituationEventArgs> ChangedSituationEvent;
   private static Point NextLanePosition = new Point(Width + 2, Height - 7);
   private Cell[,] cells;
   private Block block;
   private List<Block> nextQueue;
   private int frame;
+  private bool isCritical;
   internal int DropFrame { get; set; }
   internal int FastFrame { get { return DropFrame / 2; } }
   private bool deletingOrCompressing;
   internal void Init(int dropFrame)
   {
     DropFrame = dropFrame;
-    // FastFrame = DropFrame / 2;
     cells = new Cell[Width, Height + 3];
     BuildStage();
     deleter.DeletedEvent += OnDeletedEvent;
     compressor.CompressedEvent += OnCompressedEvent;
     frame = 0;
+    isCritical = false;
     deletingOrCompressing = false;
     nextQueue = new List<Block>();
     for (int i = 0; i < 3; i++) EnqueueBlock();
@@ -42,8 +57,20 @@ public class Board : MonoBehaviour
     GameObject[] objects = { Instantiate(prefab), Instantiate(prefab), Instantiate(prefab), Instantiate(prefab) };
     var newBlock = gameObject.AddComponent<Block>() as Block;
 
-    newBlock.Init(objects, NextLanePosition.Add(0, -3 * order), CalcCompressorChance());
+    float compressorChance = CalcCompressorChance();
+    newBlock.Init(objects, NextLanePosition.Add(0, -3 * order), compressorChance);
     nextQueue.Add(newBlock);
+
+    if (!isCritical && compressorChance >= CriticalThreshold)
+    {
+      isCritical = true;
+      ChangedSituationEvent(this, new ChangedSituationEventArgs(Situation.Critical));
+    }
+    else if (isCritical && compressorChance < CriticalThreshold)
+    {
+      isCritical = false;
+      ChangedSituationEvent(this, new ChangedSituationEventArgs(Situation.Normal));
+    }
   }
   private float CalcCompressorChance()
   {

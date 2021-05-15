@@ -12,7 +12,6 @@ public class GameOver : MonoBehaviour
   public Text restart;
   public Text quit;
   public AudioSource audioSource;
-  public AudioSource bgmAudioSource;
   public event EventHandler RestartEvent;
   public event EventHandler QuitEvent;
   void Awake()
@@ -21,7 +20,6 @@ public class GameOver : MonoBehaviour
   }
   internal void Activate()
   {
-    bgmAudioSource.Stop();
     audioSource.PlayOneShot(soundGameover);
     restart.GetComponent<Selectable>().Select();
     gameObject.SetActive(true);
