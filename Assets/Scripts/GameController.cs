@@ -18,6 +18,7 @@ public class GameController : MonoBehaviour
   public AudioSource bgmAudioSource;
   private int frame;
   private int score;
+  private DateTime startTime;
   void Start()
   {
     frame = StartingFrameRate;
@@ -31,14 +32,18 @@ public class GameController : MonoBehaviour
     gameOver.QuitEvent += OnQuit;
 
     board.Init(frame);
-
     ready.Activate();
+  }
+  void Update()
+  {
+    ChangeSpeed();
   }
   void OnReadyGo(object sender, EventArgs e)
   {
     board.gameObject.SetActive(true);
     bgmAudioSource.clip = normalBgm;
     bgmAudioSource.Play();
+    startTime = DateTime.Now;
   }
   void OnChangedSituation(object sender, ChangedSituationEventArgs e)
   {
@@ -58,7 +63,7 @@ public class GameController : MonoBehaviour
   void OnDeleted(object sender, DeletedEventArgs e)
   {
     Scoring(e.Lines);
-    ChangeSpeed(score);
+    ChangeSpeed();
   }
   private void Scoring(int lines)
   {
@@ -68,14 +73,22 @@ public class GameController : MonoBehaviour
     else score += lines * 300;
     ScoreText.text = score.ToString();
   }
-  private void ChangeSpeed(int score)
+  private void ChangeSpeed()
   {
-    if (score >= 8000) frame = (int)(StartingFrameRate * 0.2);
-    else if (score >= 5000) frame = (int)(StartingFrameRate * 0.3);
-    else if (score >= 3000) frame = (int)(StartingFrameRate * 0.5);
-    else if (score >= 1500) frame = (int)(StartingFrameRate * 0.7);
-    else if (score >= 500) frame = (int)(StartingFrameRate * 0.9);
-    board.DropFrame = frame;
+    double interval = (DateTime.Now - startTime).TotalSeconds;
+
+    if (score < 300) frame = StartingFrameRate;
+    else if (score >= 20000 || interval >= 480) frame = (int)(StartingFrameRate * 0.1);
+    else if (score >= 8000 || interval >= 300) frame = (int)(StartingFrameRate * 0.2);
+    else if (score >= 5000 || interval >= 210) frame = (int)(StartingFrameRate * 0.3);
+    else if (score >= 3000 || interval >= 120) frame = (int)(StartingFrameRate * 0.5);
+    else if (score >= 1500 || interval >= 60) frame = (int)(StartingFrameRate * 0.7);
+    else if (score >= 500 || interval >= 30) frame = (int)(StartingFrameRate * 0.9);
+    if (board.DropFrame != frame)
+    {
+      Debug.Log("change speed: " + frame);
+      board.DropFrame = frame;
+    }
   }
   void OnGameOver(object sender, EventArgs e)
   {
