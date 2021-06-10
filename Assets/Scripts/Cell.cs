@@ -39,6 +39,7 @@ class Colors
 }
 class Cell
 {
+  public static float Size = 0.355f;
   private State state;
   internal State State
   {

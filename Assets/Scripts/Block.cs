@@ -64,7 +64,7 @@ class Block : MonoBehaviour
       rotation = r;
       for (var i = 0; i < Current.Length; i++)
       {
-        cells[i].Position = cells[0].Position + new Vector2(0.355f * Current[i].X, 0.355f * Current[i].Y);
+        cells[i].Position = cells[0].Position + new Vector2(Cell.Size * Current[i].X, Cell.Size * Current[i].Y);
       }
     }
     return rotations[r];
@@ -73,7 +73,7 @@ class Block : MonoBehaviour
   {
     foreach (var cell in cells)
     {
-      cell.Position += new Vector2(0.355f * dx, 0.355f * dy);
+      cell.Position += new Vector2(Cell.Size * dx, Cell.Size * dy);
     }
     position = new Point(position.X + dx, position.Y + dy);
   }
@@ -149,7 +149,7 @@ class Block : MonoBehaviour
     this.position = position;
     for (var i = 0; i < Current.Length; i++)
     {
-      var vec = new Vector2(-2f + (position.X + Current[i].X) * 0.355f, -3.790f + (position.Y + Current[i].Y) * 0.355f);
+      var vec = new Vector2(-2f + (position.X + Current[i].X) * Cell.Size, -3.790f + (position.Y + Current[i].Y) * Cell.Size);
       var cell = new Cell((State)type, objects[i], vec);
       cells.Add(cell);
     }

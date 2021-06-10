@@ -101,7 +101,7 @@ public class Board : MonoBehaviour
       for (int x = 0; x < Width; x++)
       {
         GameObject obj = Instantiate(prefab);
-        var position = new Vector2(-2f + x * 0.355f, -3.790f + y * 0.355f);
+        var position = new Vector2(-2f + x * Cell.Size, -3.790f + y * Cell.Size);
         cells[x, y] = (x == 0 || x == Width - 1 || y == 0) ?
           new Cell(State.Wall, obj, position) : new Cell(State.Empty, obj, position);
       }
